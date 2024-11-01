@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Expenses
+{% endblock %}
+
+{% block main %}
+
+    <div class="section" style="text-align: center; margin: 100px auto;">
+        <form action="/period" method="post">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date" name="start_date">
+
+            <label for="end-date">End Date:</label>
+            <input type="date" id="end-date" name="end_date">
+            <input type="submit">
+        </form>
+    </div>
+
+
+{% endblock %}

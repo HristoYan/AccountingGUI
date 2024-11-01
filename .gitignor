@@ -1,0 +1,5 @@
+# ignore ALL .db files
+*.db
+
+# ignore ALL files in ANY directory named venv
+/venv

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Expenses
+{% endblock %}
+
+{% block main %}
+<div class="section" style="text-align: center; margin: 100px auto;">
+     <form action="/category" method="post">
+        <div class="mb-3">
+            <select class="form-select" aria-label="Default select example"
+                    name="category" style="width: 19%; margin: 20px auto">
+                <option selected>Category</option>
+                {% for row in categories %}
+                    <option value="{{ row }}">{{ row }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Check</button>
+    </form>
+
+</div>
+
+{% endblock %}

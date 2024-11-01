@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+   Spend Money
+{% endblock %}
+
+{% block main %}
+    <h1>Spend Money</h1>
+    <form action="/spend" method="post">
+        <div class="mb-3">
+            <input autofocus autocomplete="off" class="form-control mx-auto w-auto" id="amount"
+                   style="margin-top: 10px; width: 16%" name="amount" placeholder="Amount to spend" type="text">
+            <select class="form-select" aria-label="Default select example"
+                    name="category" style="width: 19%; margin: 20px auto">
+                <option selected>Select a Category</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Spend</button>
+    </form>
+{% endblock %}
