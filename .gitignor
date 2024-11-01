@@ -1,5 +1,6 @@
 # ignore ALL .db files
 *.db
 
-# ignore ALL files in ANY directory named venv
+# ignore ALL files in ANY directory named venv, flask_session
 /venv
+/flask_session
