@@ -146,7 +146,7 @@ def login():
         session["first_name"] = rows[0]["first_name"]
 
         # Redirect user to home page
-        return redirect("/", name=session['first_name'])
+        return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -261,6 +261,7 @@ def expenses():
     print(request.method)
 
     expense_info = []
+    all_info = []
     criteria = 'All'
     if request.method == 'POST':
         criteria = request.form.get('criteria')
@@ -273,21 +274,34 @@ def expenses():
 
         elif criteria == 'Category':
             return render_template("category.html", categories=categories)
+
         elif criteria == 'Max in Category':
-            pass
+            dict_info = get_criteria_info()
+
+            all_info = []
+            for cat, expenses in dict_info.items():
+                max_expense = max(expenses, key=lambda d: d['amount'])
+                all_info.append(max_expense)
+
         elif criteria == 'Min in Category':
-            pass
+            dict_info = get_criteria_info()
+
+            all_info = []
+            for cat, expenses in dict_info.items():
+                max_expense = min(expenses, key=lambda d: d['amount'])
+                all_info.append(max_expense)
         elif criteria == 'Max in Period':
             pass
         elif criteria == 'Min in Period':
             pass
         else:
             expense_info = get_all_expenses()
+            all_info = expenses_visualization(expense_info)
     else:
         print('IN ELSE: ')
         expense_info = get_all_expenses()
 
-    all_info = expenses_visualization(expense_info)
+        all_info = expenses_visualization(expense_info)
 
     return render_template("expenses.html", info=all_info, criteria=sorting_criteria)
 
@@ -365,3 +379,17 @@ def expenses_visualization(rows: list[dict]):
         all_info.append(info)
 
     return all_info
+
+
+def get_criteria_info():
+    all_expenses = get_all_expenses()
+    dict_info = {}
+
+    for expense in all_expenses:
+        temp = expense['category']
+        if temp not in dict_info:
+            dict_info[temp] = [expense]
+        else:
+            dict_info[temp].append(expense)
+
+    return dict_info
