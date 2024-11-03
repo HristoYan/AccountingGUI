@@ -21,3 +21,60 @@ nav .navbar-brand .green
 {
     color: #2e944b;
 }
+
+
+
+header {
+    border-bottom: 2px solid lightgray;
+    margin-bottom: 30px;
+}
+
+h1, h2 {
+    font-size: 3rem;
+    color: #537fbe;
+    margin-bottom: 15px;
+}
+
+.subtitle {
+    font-size: 1.4rem;
+
+}
+
+
+p {
+    font-size: 1.4rem;
+    text-align: center;
+    color: #537fbe;
+}
+
+.flex-box {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+.statBar {
+    background-color: lightgray;
+    height: 40px;
+    margin-right: 20px;
+}
+
+.name {
+    width: 130px;
+    text-align: left;
+}
+
+.value {
+    text-align: end;
+    margin-left: auto;
+}
+
+.utilities {
+}
+
+.transportation {
+ }
+loan-and-interest-payments, 'Insurance', 'Gifts', 'Travel expenses',
+              'Education', 'Clothing', 'Rent or mortgage', 'Maintenance and repairs', 'Legal expenses',
+              'Medical Health', 'Professional services', 'Saving, investing, & debt payments', 'Fun', 'Food'

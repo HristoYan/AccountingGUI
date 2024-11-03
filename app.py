@@ -1,12 +1,9 @@
-import os
 import pendulum
-
-from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-from helper import apology, login_required
+from helper import apology, login_required, get_period_info, expenses_visualization, get_all_expenses, \
+    get_criteria_info, db
 from models.log_in import UserLog
 from models.expense import Expense
 
@@ -19,7 +16,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 # create_db()
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///db/accounting.db")
+# db = SQL("sqlite:///db/accounting.db")
 db.execute("CREATE TABLE IF NOT EXISTS "
            "users(id INTEGER UNIQUE,"
            "first_name TEXT, "
@@ -198,7 +195,7 @@ def add_money():
 
 categories = ['Utilities', 'Transportation', 'Loan and interest payments', 'Insurance', 'Gifts', 'Travel expenses',
               'Education', 'Clothing', 'Rent or mortgage', 'Maintenance and repairs', 'Legal expenses',
-              'Medical Health', 'Professional services', 'Saving, investing, & debt payments', 'Fun']
+              'Medical Health', 'Professional services', 'Saving, investing, & debt payments', 'Fun', 'Food']
 
 
 @app.route("/spend", methods=["GET", "POST"])
@@ -251,7 +248,7 @@ def spend():
 
 
 sorting_criteria = ['Date', 'Period', 'Category', 'Max in Category',
-                    'Min in Category', 'Max in Period', 'Min in Period']
+                    'Min in Category', 'Max in Period', 'Min in Period', 'Statistics']
 
 
 @app.route('/expenses', methods=['GET', 'POST'])
@@ -291,9 +288,13 @@ def expenses():
                 max_expense = min(expenses, key=lambda d: d['amount'])
                 all_info.append(max_expense)
         elif criteria == 'Max in Period':
-            pass
+            return render_template("maxperiod.html", criteria=criteria)
+
         elif criteria == 'Min in Period':
-            pass
+            return render_template("minperiod.html", criteria=criteria)
+        elif criteria == 'Statistics':
+            stat_info, total = stats()
+            return render_template("statistics.html", stat_info=stat_info, total=total)
         else:
             expense_info = get_all_expenses()
             all_info = expenses_visualization(expense_info)
@@ -329,17 +330,12 @@ def by_date():
 
 @app.route('/period', methods=['GET', 'POST'])
 @login_required
-def by_period():
+def by_period(criteria=None):
     print('In Period: ')
     if request.method == 'POST':
         start_date = pendulum.parse(request.form.get('start_date')).timestamp()
         end_date = pendulum.parse(request.form.get('end_date')).add(days=1).timestamp()
-        date_var = get_all_expenses()
-        all_info = []
-        for row in date_var:
-            row_date = pendulum.parse(row['time']).timestamp()
-            if start_date <= row_date <= end_date:
-                all_info.append(row)
+        all_info = get_period_info(start_date, end_date)
 
         return render_template("expenses.html", info=all_info, criteria=sorting_criteria)
     else:
@@ -361,35 +357,60 @@ def category():
         redirect('/category.html', categories=categories) # noqa
 
 
-def get_all_expenses():
-    """Returning user's all expenses"""
-    return db.execute('SELECT * FROM expense WHERE user_id=?', session['user_id'])
+@app.route('/maxperiod', methods=['GET', 'POST'])
+@login_required
+def by_maxperiod():
+    print('In MaxPeriod: ')
+    if request.method == 'POST':
+        start_date = pendulum.parse(request.form.get('start_date')).timestamp()
+        end_date = pendulum.parse(request.form.get('end_date')).add(days=1).timestamp()
+        all_info = get_period_info(start_date, end_date)
+        max_info = []
+        max_expense = max(all_info, key=lambda d: d['amount'])
+        max_info.append(max_expense)
+        print(max_info)
+        return render_template("expenses.html", info=max_info, criteria=sorting_criteria)
+    else:
+        redirect('/maxperiod.html')
 
 
-def get_expenses_by_period(start, end):
-    """Returning user's expenses by period"""
-    period_expenses = db.execute('SELECT * FROM expense WHERE user_id=?', session['user_id'])
+@app.route('/minperiod', methods=['GET', 'POST'])
+@login_required
+def by_minperiod():
+    print('In MaxPeriod: ')
+    if request.method == 'POST':
+        start_date = pendulum.parse(request.form.get('start_date')).timestamp()
+        end_date = pendulum.parse(request.form.get('end_date')).add(days=1).timestamp()
+        all_info = get_period_info(start_date, end_date)
+        min_info = []
+        min_expense = min(all_info, key=lambda d: d['amount'])
+        min_info.append(min_expense)
+        print(min_info)
+        return render_template("expenses.html", info=min_info, criteria=sorting_criteria)
+    else:
+        redirect('/minperiod.html')
 
 
-def expenses_visualization(rows: list[dict]):
-    all_info = []
-    for row in rows:
-        info = {'amount': row['amount'], 'type': row['type'], 'category': row['category'], 'time': row['time']}
+@app.route('/stats', methods=['post'])
+@login_required
+def stats():
+    all_info = get_all_expenses()
+    all_money_spent = sum(info['amount'] for info in all_info)
+    print(f"Total money spent: {all_money_spent}")
+    category_totals = {}
+    cat_total = []
+    for info in all_info:
+        category = info['category']
+        amount = info['amount']
 
-        all_info.append(info)
-
-    return all_info
-
-
-def get_criteria_info():
-    all_expenses = get_all_expenses()
-    dict_info = {}
-
-    for expense in all_expenses:
-        temp = expense['category']
-        if temp not in dict_info:
-            dict_info[temp] = [expense]
+        if category in category_totals:
+            category_totals[category] += amount
         else:
-            dict_info[temp].append(expense)
+            category_totals[category] = amount
 
-    return dict_info
+    for category, total in category_totals.items():
+        temp = ({'category': category, 'total': total})
+        cat_total.append(temp)
+    print(cat_total)
+    return cat_total, all_money_spent
+
