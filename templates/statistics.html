@@ -7,13 +7,17 @@
 {% block main %}
     <h2>Statistics</h2>
     <h3>Grand total: ${{ total }}</h3>
-    <div class="section" style="text-align: center; margin: 100px auto;">
+    <div class="section" style="text-align: left; margin: 100px auto;">
         {% for row in stat_info %}
             <div class="flex-box">
                 <p class="name">{{ row['category'] }}</p>
                 <div class="statBar {{ row['category'].replace(' ', '-') | lower }}"
                      style="width: {{ (row['total'] / total) * 100 }}%">
-                    <p class="value">${{ row['total'] }}</p>
+                    <p class="value" style="margin: 0; display: inline; text-align: left;" >${{ row['total'] }}</p>
+                </div>
+                <div style="display: inline; text-align: left;">
+                        <p class="value" style="margin: 0; display: inline; text-align: left;">
+                            {{ ((row['total'] / total) * 100) | round }}%</p>
                 </div>
             </div>
         {% endfor %}

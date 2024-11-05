@@ -14,9 +14,7 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-# create_db()
-# Configure CS50 Library to use SQLite database
-# db = SQL("sqlite:///db/accounting.db")
+
 db.execute("CREATE TABLE IF NOT EXISTS "
            "users(id INTEGER UNIQUE,"
            "first_name TEXT, "
@@ -62,34 +60,47 @@ def register():
     if request.method == "POST":
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
-        age = int(request.form.get("age"))
+        age = 0
+        try:
+            age = int(request.form.get("age"))
+        except:
+            apology("Age must be an integer", 400)
+        else:
+            apology("Age must be an integer", 404)
         email = request.form.get("email")
-        money = int(request.form.get("money"))
+        money = 0
+        try:
+            money = int(request.form.get("money"))
+        except:
+            apology("Money must be an integer", 400)
+        else:
+            apology("Money must be an integer", 404)
+
         password = generate_password_hash(request.form.get("password"))
 
         # Ensure username was submitted
         if not first_name:
-            return apology("must provide First name", 400)
+            return apology("Must provide First name", 400)
 
         elif not last_name:
-            return apology("must provide Last Name", 400)
+            return apology("Must provide Last Name", 400)
 
         elif not age:
-            return apology("must provide Age", 400)
+            return apology("Must provide Age", 400)
 
         elif not email:
-            return apology("must provide Email", 400)
+            return apology("Must provide Email", 400)
 
         elif not money:
-            return apology("must provide Money", 400)
+            return apology("Must provide Money", 400)
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide Password", 400)
+            return apology("Must provide Password", 400)
 
         # Ensure password and confirmation match
         if not request.form.get("password") == request.form.get("confirmation"):
-            return apology("passwords don't match", 400)
+            return apology("Passwords don't match", 400)
 
         # Ensure that the email is free
         check_email = db.execute("SELECT email FROM users WHERE email=?", email)
@@ -125,18 +136,18 @@ def login():
         password = request.form.get("password")
         # Ensure username was submitted
         if not email:
-            return apology("must provide Email", 403)
+            return apology("Must provide Email", 403)
 
         # Ensure password was submitted
         elif not password:
-            return apology("must provide password", 403)
+            return apology("Must provide password", 403)
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE email = ?", email)
 
         # Ensure email exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["password"], password):
-            return apology("invalid username and/or password", 403)
+            return apology("Invalid username and/or password", 403)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
