@@ -113,7 +113,7 @@ def register():
         # Insert username in database
         db.execute("INSERT INTO users (first_name, last_name, age, email, money, password) "
                    "VALUES (?, ?, ?, ?, ?, ?)", user.first_name, user.last_name, user.age,
-                   user.email, user.money, user._password)
+                   user.email, user.money, user._password) # noqa
 
         # Redirect user to home page
         return redirect("/login")
@@ -152,6 +152,7 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
         session["first_name"] = rows[0]["first_name"]
+        session["money"] = rows[0]["money"]
 
         # Redirect user to home page
         return redirect("/")
@@ -183,7 +184,7 @@ def add_money():
             money_to_add = int(request.form.get("money"))
 
         except ValueError as e:
-            return apology(f"The money must be a positive integer. {e}", 400)
+            return apology(f"The money must be a positive integer.", 400)
 
         if money_to_add < 1 or money_to_add is None:
             return apology("The money must be a positive integer")
@@ -192,10 +193,11 @@ def add_money():
             money_to_the_bank = db.execute("SELECT money FROM users WHERE id=?", session["user_id"])
             print(money_to_the_bank[0]['money'])
         except ValueError as e:
-            return apology(f"The money must be a positive integer. {e}", 400)
+            return apology(f"The money must be a positive integer.", 400)
         total = money_to_add + int(money_to_the_bank[0]['money'])
 
         db.execute('UPDATE users SET money=? WHERE id=?', total, session['user_id'])
+        session["money"] = db.execute("SELECT money FROM users WHERE id=?", session['user_id'])[0]['money']
 
         print("Successfully added money to your account.")
         return redirect("/")
@@ -220,10 +222,14 @@ def spend():
 
         try:
             category = request.form.get('category')
+            if category == "":
+                apology('Category is required.', 400)
             try:
                 amount = int(request.form.get('amount'))
             except:
                 return apology("The amount must be a positive integer", 400)
+            else:
+                apology('Category is required.', 400)
 
             if amount < 1:
                 return apology("The amount must be a positive integer")
@@ -251,6 +257,8 @@ def spend():
         db.execute("INSERT INTO expense (user_id, amount, type, category, time) "
                    "VALUES (?, ?, ?, ?, ?)", session['user_id'], expense.spend_amount,
                    expense.type_of_expense, expense.category, expense.time)
+
+        session["money"] = db.execute("SELECT money FROM users WHERE id=?", session['user_id'])[0]['money']
 
         return redirect("/")
 

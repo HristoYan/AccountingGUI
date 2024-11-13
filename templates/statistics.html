@@ -12,7 +12,7 @@
             <div class="flex-box">
                 <p class="name">{{ row['category'] }}</p>
                 <div class="statBar {{ row['category'].replace(' ', '-') | lower }}"
-                     style="width: {{ (row['total'] / total) * 100 }}%">
+                     style="width: {% if (row['total'] / total) * 100 < 5 %}3{% else %}{{ (row['total'] / total) * 100 }}{% endif %}%">
                     <p class="value" style="margin: 0; display: inline; text-align: left;" >${{ row['total'] }}</p>
                 </div>
                 <div style="display: inline; text-align: left;">
